@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Details - ElectraLux Motors</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0A0A0A;
+            --secondary-dark: #1A1A1A;
+            --accent-gold: #D4AF37;
+            --electric-blue: #00D4FF;
+            --pure-white: #FFFFFF;
+            --silver-chrome: #C0C0C0;
+            --gradient-aurora: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0F0F23 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gradient-aurora);
+            color: var(--pure-white);
+            line-height: 1.6;
+            padding-top: 80px;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--pure-white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Main Content */
+        .car-details-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .breadcrumb {
+            margin-bottom: 2rem;
+            color: var(--silver-chrome);
+        }
+
+        .breadcrumb a {
+            color: var(--electric-blue);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Car Details Layout */
+        .car-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Image Gallery */
+        .image-gallery {
+            position: relative;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+        }
+
+        .thumbnail-gallery {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .thumbnail:hover,
+        .thumbnail.active {
+            border-color: var(--electric-blue);
+            transform: scale(1.05);
+        }
+
+        /* Car Info */
+        .car-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .car-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .car-price {
+            font-size: 2rem;
+            color: var(--electric-blue);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .car-overview {
+            background: rgba(26, 26, 26, 0.8);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .overview-title {
+            font-size: 1.2rem;
+            color: var(--electric-blue);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .overview-text {
+            color: var(--silver-chrome);
+            line-height: 1.7;
+        }
+
+        /* Key Specs */
+        .key-specs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .spec-item {
+            background: rgba(26, 26, 26, 0.6);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .spec-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .spec-label {
+            font-size: 0.9rem;
+            color: var(--silver-chrome);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--electric-blue), #0099CC);
+            color: var(--pure-white);
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 2px solid var(--accent-gold);
+            color: var(--accent-gold);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-gold);
+            color: var(--primary-dark);
+        }
+
+        /* Specification Tabs */
+        .specs-section {
+            margin-top: 4rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .tabs-container {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .tabs-header {
+            display: flex;
+            background: rgba(10, 10, 10, 0.8);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--silver-chrome);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            color: var(--electric-blue);
+        }
+
+        .tab-button.active {
+            color: var(--electric-blue);
+            border-bottom-color: var(--electric-blue);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .spec-card {
+            background: rgba(10, 10, 10, 0.6);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .spec-card h4 {
+            color: var(--electric-blue);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .spec-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .spec-detail:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .spec-detail-label {
+            color: var(--silver-chrome);
+        }
+
+        .spec-detail-value {
+            color: var(--pure-white);
+            font-weight: 500;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--secondary-dark);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--silver-chrome);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .modal-close:hover {
+            color: var(--electric-blue);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--electric-blue);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-dark);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            color: var(--pure-white);
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .form-input.error {
+            border-color: #ff4444;
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--primary-dark);
+            padding: 3rem 0 1rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+
+        .footer-text {
+            color: var(--silver-chrome);
+            margin-bottom: 2rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .car-details-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .car-details-container {
+                padding: 1rem;
+            }
+
+            .car-title {
+                font-size: 2rem;
+            }
+
+            .car-price {
+                font-size: 1.5rem;
+            }
+
+            .tabs-header {
+                flex-direction: column;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .key-specs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">ElectraLux</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="inventory.html">Inventory</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="car-details-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="index.html">Home</a> / <a href="inventory.html">Inventory</a> / <span id="carName">Car Details</span>
+        </div>
+
+        <!-- Car Details Grid -->
+        <div class="car-details-grid">
+            <!-- Image Gallery -->
+            <div class="image-gallery">
+                <img id="mainImage" src="" alt="" class="main-image">
+                <div class="thumbnail-gallery" id="thumbnailGallery">
+                    <!-- Thumbnails will be dynamically loaded -->
+                </div>
+            </div>
+
+            <!-- Car Information -->
+            <div class="car-info">
+                <div>
+                    <h1 class="car-title" id="carTitle">Loading...</h1>
+                    <div class="car-price" id="carPrice">Loading...</div>
+                </div>
+
+                <div class="car-overview">
+                    <h3 class="overview-title">Overview</h3>
+                    <p class="overview-text" id="carOverview">
+                        Experience the future of luxury electric vehicles with this exceptional model. 
+                        Combining cutting-edge technology, breathtaking performance, and sustainable 
+                        engineering, this vehicle represents the pinnacle of electric automotive innovation.
+                    </p>
+                </div>
+
+                <div class="key-specs" id="keySpecs">
+                    <!-- Key specifications will be dynamically loaded -->
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="openTestDriveModal()">Schedule Test Drive</button>
+                    <a href="contact.html" class="btn-secondary">Contact Dealer</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Specification Tabs -->
+        <div class="specs-section">
+            <h2 class="section-title">Detailed Specifications</h2>
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-button active" onclick="switchTab('performance')">Performance</button>
+                    <button class="tab-button" onclick="switchTab('battery')">Battery & Range</button>
+                    <button class="tab-button" onclick="switchTab('technology')">Technology</button>
+                    <button class="tab-button" onclick="switchTab('interior')">Interior & Comfort</button>
+                </div>
+
+                <div id="performance" class="tab-content active">
+                    <div class="specs-grid">
+                        <div class="spec-card">
+                            <h4>Performance Metrics</h4>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">0-60 mph</span>
+                                <span class="spec-detail-value" id="spec-0-60">Loading...</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Top Speed</span>
+                                <span class="spec-detail-value" id="spec-top-speed">155 mph</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Horsepower</span>
+                                <span class="spec-detail-value" id="spec-horsepower">Loading...</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Torque</span>
+                                <span class="spec-detail-value" id="spec-torque">774 lb-ft</span>
+                            </div>
+                        </div>
+                        <div class="spec-card">
+                            <h4>Drivetrain</h4>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Motor Type</span>
+                                <span class="spec-detail-value">Dual Electric Motors</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Drivetrain</span>
+                                <span class="spec-detail-value">All-Wheel Drive</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Transmission</span>
+                                <span class="spec-detail-value">Single-Speed Automatic</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Regenerative Braking</span>
+                                <span class="spec-detail-value">Yes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="battery" class="tab-content">
+                    <div class="specs-grid">
+                        <div class="spec-card">
+                            <h4>Battery Specifications</h4>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Battery Capacity</span>
+                                <span class="spec-detail-value">100 kWh</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Battery Type</span>
+                                <span class="spec-detail-value">Lithium-Ion</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Voltage</span>
+                                <span class="spec-detail-value">400V</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Battery Warranty</span>
+                                <span class="spec-detail-value">8 years/120k miles</span>
+                            </div>
+                        </div>
+                        <div class="spec-card">
+                            <h4>Charging & Range</h4>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">EPA Range</span>
+                                <span class="spec-detail-value" id="spec-range">Loading...</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">DC Fast Charging</span>
+                                <span class="spec-detail-value">250 kW Max</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">10-80% Charge Time</span>
+                                <span class="spec-detail-value">28 minutes</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Home Charging (AC)</span>
+                                <span class="spec-detail-value">11.5 kW</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="technology" class="tab-content">
+                    <div class="specs-grid">
+                        <div class="spec-card">
+                            <h4>Autonomous Features</h4>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Autopilot Level</span>
+                                <span class="spec-detail-value">Level 2</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Adaptive Cruise Control</span>
+                                <span class="spec-detail-value">Yes</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Lane Keeping Assist</span>
+                                <span class="spec-detail-value">Yes</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Automatic Emergency Braking</span>
+                                <span class="spec-detail-value">Yes</span>
+                            </div>
+                        </div>
+                        <div class="spec-card">
+                            <h4>Infotainment</h4>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Display Size</span>
+                                <span class="spec-detail-value">17 inches</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Navigation</span>
+                                <span class="spec-detail-value">GPS with Traffic</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Audio System</span>
+                                <span class="spec-detail-value">Premium 22-speaker</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Connectivity</span>
+                                <span class="spec-detail-value">5G, WiFi, Bluetooth</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="interior" class="tab-content">
+                    <div class="specs-grid">
+                        <div class="spec-card">
+                            <h4>Seating & Capacity</h4>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Seating Capacity</span>
+                                <span class="spec-detail-value">5 passengers</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Interior Material</span>
+                                <span class="spec-detail-value">Premium Vegan Leather</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Heated Seats</span>
+                                <span class="spec-detail-value">Front & Rear</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Ventilated Seats</span>
+                                <span class="spec-detail-value">Front Only</span>
+                            </div>
+                        </div>
+                        <div class="spec-card">
+                            <h4>Comfort & Convenience</h4>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Climate Control</span>
+                                <span class="spec-detail-value">Tri-Zone Automatic</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Panoramic Roof</span>
+                                <span class="spec-detail-value">Yes</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Ambient Lighting</span>
+                                <span class="spec-detail-value">Customizable LED</span>
+                            </div>
+                            <div class="spec-detail">
+                                <span class="spec-detail-label">Wireless Charging</span>
+                                <span class="spec-detail-value">Yes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Drive Modal -->
+    <div id="testDriveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Schedule Test Drive</h2>
+                <button class="modal-close" onclick="closeTestDriveModal()">&times;</button>
+            </div>
+            
+            <form id="testDriveForm">
+                <div class="form-group">
+                    <label class="form-label" for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" name="fullName" class="form-input" required>
+                    <div class="error-message" id="fullNameError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" class="form-input" required>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" required>
+                    <div class="error-message" id="phoneError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="preferredDate">Preferred Date *</label>
+                    <input type="date" id="preferredDate" name="preferredDate" class="form-input" required>
+                    <div class="error-message" id="preferredDateError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="preferredTime">Preferred Time *</label>
+                    <select id="preferredTime" name="preferredTime" class="form-input" required>
+                        <option value="">Select a time</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                    <div class="error-message" id="preferredTimeError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="message">Additional Notes</label>
+                    <textarea id="message" name="message" class="form-input" rows="3" placeholder="Any specific questions or requirements..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn-primary" style="width: 100%;">Schedule Test Drive</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">ElectraLux Motors</div>
+            <p class="footer-text">© 2025 ElectraLux Motors. Driving the future of luxury electric vehicles.</p>
+        </div>
+    </footer>
+
+    <script>
+        let currentCar = null;
+
+        // Get car ID from URL
+        function getCarIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Load car details
+        function loadCarDetails() {
+            const carId = getCarIdFromUrl();
+            if (!carId || !window.ElectraLux || !window.ElectraLux.carInventory) {
+                window.location.href = 'inventory.html';
+                return;
+            }
+
+            currentCar = window.ElectraLux.carInventory.find(car => car.id == carId);
+            if (!currentCar) {
+                window.location.href = 'inventory.html';
+                return;
+            }
+
+            // Update page content
+            document.getElementById('carName').textContent = currentCar.name;
+            document.getElementById('carTitle').textContent = currentCar.name;
+            document.getElementById('carPrice').textContent = currentCar.price;
+            document.getElementById('mainImage').src = currentCar.image;
+            document.getElementById('mainImage').alt = currentCar.name;
+
+            // Update key specs
+            document.getElementById('keySpecs').innerHTML = `
+                <div class="spec-item">
+                    <div class="spec-value">${currentCar.acceleration}</div>
+                    <div class="spec-label">0-60 mph</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-value">${currentCar.range}</div>
+                    <div class="spec-label">EPA Range</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-value">${currentCar.horsepower}</div>
+                    <div class="spec-label">Horsepower</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-value">${currentCar.year}</div>
+                    <div class="spec-label">Model Year</div>
+                </div>
+            `;
+
+            // Update specification tabs
+            document.getElementById('spec-0-60').textContent = currentCar.acceleration;
+            document.getElementById('spec-horsepower').textContent = currentCar.horsepower;
+            document.getElementById('spec-range').textContent = currentCar.range;
+
+            // Load thumbnails (using the same image for demo)
+            const thumbnailGallery = document.getElementById('thumbnailGallery');
+            const thumbnails = [currentCar.image, currentCar.image, currentCar.image, currentCar.image];
+            thumbnailGallery.innerHTML = thumbnails.map((img, index) => `
+                <img src="${img}" alt="${currentCar.name} ${index + 1}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage('${img}', this)">
+            `).join('');
+        }
+
+        // Change main image
+        function changeMainImage(imageSrc, thumbnailElement) {
+            document.getElementById('mainImage').src = imageSrc;
+            
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            thumbnailElement.classList.add('active');
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Modal functions
+        function openTestDriveModal() {
+            document.getElementById('testDriveModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTestDriveModal() {
+            document.getElementById('testDriveModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Test drive form handling
+        function initializeTestDriveForm() {
+            const form = document.getElementById('testDriveForm');
+            if (!form) return;
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Clear previous errors
+                document.querySelectorAll('.error-message').forEach(error => {
+                    error.classList.remove('show');
+                });
+                document.querySelectorAll('.form-input').forEach(input => {
+                    input.classList.remove('error');
+                });
+
+                let isValid = true;
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+
+                // Validate required fields
+                const requiredFields = ['fullName', 'email', 'phone', 'preferredDate', 'preferredTime'];
+                requiredFields.forEach(field => {
+                    if (!data[field] || data[field].trim() === '') {
+                        showFieldError(field, 'This field is required');
+                        isValid = false;
+                    }
+                });
+
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (data.email && !emailRegex.test(data.email)) {
+                    showFieldError('email', 'Please enter a valid email address');
+                    isValid = false;
+                }
+
+                // Phone validation
+                const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+                if (data.phone && !phoneRegex.test(data.phone.replace(/[\s\-\(\)]/g, ''))) {
+                    showFieldError('phone', 'Please enter a valid phone number');
+                    isValid = false;
+                }
+
+                // Date validation (must be in future)
+                if (data.preferredDate) {
+                    const selectedDate = new Date(data.preferredDate);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    if (selectedDate < today) {
+                        showFieldError('preferredDate', 'Please select a future date');
+                        isValid = false;
+                    }
+                }
+
+                if (isValid) {
+                    // Simulate form submission
+                    showNotification('Test drive scheduled successfully! We will contact you soon.', 'success');
+                    closeTestDriveModal();
+                    form.reset();
+                }
+            });
+        }
+
+        function showFieldError(fieldName, message) {
+            const field = document.getElementById(fieldName);
+            const errorElement = document.getElementById(fieldName + 'Error');
+            
+            if (field) {
+                field.classList.add('error');
+            }
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 2rem;
+                background: ${type === 'success' ? 'var(--electric-blue)' : '#ff4444'};
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 8px;
+                z-index: 3000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCarDetails();
+            initializeTestDriveForm();
+            
+            // Close modal when clicking outside
+            document.getElementById('testDriveModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeTestDriveModal();
+                }
+            });
+        });
+    </script>
+    <script src="main.js"></script>
+</body>
+</html>

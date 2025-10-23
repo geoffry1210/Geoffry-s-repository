@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory - ElectraLux Motors</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0A0A0A;
+            --secondary-dark: #1A1A1A;
+            --accent-gold: #D4AF37;
+            --electric-blue: #00D4FF;
+            --pure-white: #FFFFFF;
+            --silver-chrome: #C0C0C0;
+            --gradient-aurora: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0F0F23 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gradient-aurora);
+            color: var(--pure-white);
+            line-height: 1.6;
+            padding-top: 80px;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--pure-white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Main Content */
+        .inventory-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        /* Filters Sidebar */
+        .filters-sidebar {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 16px;
+            padding: 2rem;
+            height: fit-content;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 120px;
+        }
+
+        .filters-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .filter-group {
+            margin-bottom: 2rem;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--electric-blue);
+        }
+
+        .price-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--secondary-dark);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .price-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--electric-blue);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .price-display {
+            text-align: center;
+            margin-top: 0.5rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .brand-checkboxes {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .brand-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--electric-blue);
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-dark);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            color: var(--pure-white);
+            font-size: 1rem;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .reset-filters {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            border: 2px solid var(--accent-gold);
+            border-radius: 8px;
+            color: var(--accent-gold);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-filters:hover {
+            background: var(--accent-gold);
+            color: var(--primary-dark);
+        }
+
+        /* Search Bar */
+        .search-section {
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: var(--pure-white);
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--silver-chrome);
+            font-size: 1.2rem;
+        }
+
+        /* Car Grid */
+        .inventory-content {
+            min-height: 100vh;
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .inventory-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .sort-label {
+            color: var(--silver-chrome);
+            font-weight: 500;
+        }
+
+        .sort-select {
+            padding: 0.5rem 1rem;
+            background: var(--secondary-dark);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            color: var(--pure-white);
+        }
+
+        .cars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .car-card {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(50px);
+            animation: slideInUp 0.6s ease forwards;
+        }
+
+        .car-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+            border-color: var(--electric-blue);
+        }
+
+        .car-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .car-card:hover .car-image {
+            transform: scale(1.05);
+        }
+
+        .car-info {
+            padding: 1.5rem;
+        }
+
+        .car-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--pure-white);
+        }
+
+        .car-price {
+            font-size: 1.25rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .car-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--silver-chrome);
+        }
+
+        .view-details {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid var(--electric-blue);
+            color: var(--electric-blue);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+
+        .view-details:hover {
+            background: var(--electric-blue);
+            color: var(--primary-dark);
+        }
+
+        /* Results Info */
+        .results-info {
+            margin-bottom: 2rem;
+            color: var(--silver-chrome);
+            font-size: 1.1rem;
+        }
+
+        .results-count {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--silver-chrome);
+        }
+
+        .no-results h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--primary-dark);
+            padding: 3rem 0 1rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+
+        .footer-text {
+            color: var(--silver-chrome);
+            margin-bottom: 2rem;
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .inventory-container {
+                grid-template-columns: 250px 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .filters-sidebar {
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .inventory-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .inventory-title {
+                font-size: 2rem;
+            }
+
+            .cars-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--electric-blue);
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--secondary-dark);
+            border-top: 4px solid var(--electric-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">ElectraLux</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="inventory.html">Inventory</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="inventory-container">
+        <!-- Filters Sidebar -->
+        <aside class="filters-sidebar">
+            <h2 class="filters-title">Filter Inventory</h2>
+            
+            <!-- Search -->
+            <div class="filter-group">
+                <label class="filter-label">Search</label>
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search by make or model...">
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="filter-group">
+                <label class="filter-label">Price Range</label>
+                <input type="range" id="priceRange" class="price-slider" min="0" max="250000" value="250000" step="5000">
+                <div class="price-display" id="priceDisplay">$0 - $250,000</div>
+            </div>
+
+            <!-- Brand Filter -->
+            <div class="filter-group">
+                <label class="filter-label">Brand</label>
+                <div class="brand-checkboxes">
+                    <div class="brand-checkbox">
+                        <input type="checkbox" id="tesla" name="brand" value="Tesla">
+                        <label for="tesla">Tesla</label>
+                    </div>
+                    <div class="brand-checkbox">
+                        <input type="checkbox" id="lucid" name="brand" value="Lucid">
+                        <label for="lucid">Lucid</label>
+                    </div>
+                    <div class="brand-checkbox">
+                        <input type="checkbox" id="bmw" name="brand" value="BMW">
+                        <label for="bmw">BMW</label>
+                    </div>
+                    <div class="brand-checkbox">
+                        <input type="checkbox" id="mercedes" name="brand" value="Mercedes">
+                        <label for="mercedes">Mercedes-Benz</label>
+                    </div>
+                    <div class="brand-checkbox">
+                        <input type="checkbox" id="porsche" name="brand" value="Porsche">
+                        <label for="porsche">Porsche</label>
+                    </div>
+                    <div class="brand-checkbox">
+                        <input type="checkbox" id="audi" name="brand" value="Audi">
+                        <label for="audi">Audi</label>
+                    </div>
+                    <div class="brand-checkbox">
+                        <input type="checkbox" id="polestar" name="brand" value="Polestar">
+                        <label for="polestar">Polestar</label>
+                    </div>
+                    <div class="brand-checkbox">
+                        <input type="checkbox" id="genesis" name="brand" value="Genesis">
+                        <label for="genesis">Genesis</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Year Filter -->
+            <div class="filter-group">
+                <label class="filter-label">Minimum Year</label>
+                <select id="yearFilter" class="filter-select">
+                    <option value="">All Years</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                </select>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-group">
+                <label class="filter-label">Category</label>
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="luxury">Luxury</option>
+                    <option value="ultra-luxury">Ultra Luxury</option>
+                    <option value="performance">Performance</option>
+                </select>
+            </div>
+
+            <button class="reset-filters" onclick="resetFilters()">Reset All Filters</button>
+        </aside>
+
+        <!-- Inventory Content -->
+        <main class="inventory-content">
+            <div class="inventory-header">
+                <h1 class="inventory-title">Luxury EV Inventory</h1>
+                <div class="sort-controls">
+                    <span class="sort-label">Sort by:</span>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="name">Name</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="year">Year</option>
+                        <option value="range">Range</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-info">
+                Showing <span class="results-count" id="resultsCount">0</span> vehicles
+            </div>
+
+            <div class="cars-grid" id="carGrid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span style="margin-left: 1rem;">Loading inventory...</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">ElectraLux Motors</div>
+            <p class="footer-text">© 2025 ElectraLux Motors. Driving the future of luxury electric vehicles.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Reset filters function
+        function resetFilters() {
+            document.getElementById('priceRange').value = 250000;
+            document.getElementById('priceDisplay').textContent = '$0 - $250,000';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('yearFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            
+            // Uncheck all brand checkboxes
+            document.querySelectorAll('input[name="brand"]').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            // Reset sort
+            document.getElementById('sortSelect').value = 'name';
+            
+            // Apply filters to show all cars
+            if (window.ElectraLux && window.ElectraLux.carInventory) {
+                renderCarGrid(window.ElectraLux.carInventory);
+            }
+        }
+
+        // Render car grid function
+        function renderCarGrid(cars) {
+            const carGrid = document.getElementById('carGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            if (!carGrid) return;
+            
+            resultsCount.textContent = cars.length;
+            
+            if (cars.length === 0) {
+                carGrid.innerHTML = `
+                    <div class="no-results">
+                        <h3>No vehicles found</h3>
+                        <p>Try adjusting your filters or search terms</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            carGrid.innerHTML = cars.map((car, index) => `
+                <div class="car-card" style="animation-delay: ${index * 0.1}s">
+                    <img src="${car.image}" alt="${car.name}" class="car-image" loading="lazy">
+                    <div class="car-info">
+                        <h3 class="car-name">${car.name}</h3>
+                        <div class="car-price">${car.price}</div>
+                        <div class="car-specs">
+                            <span>Range: ${car.range}</span>
+                            <span>0-60: ${car.acceleration}</span>
+                            <span>Power: ${car.horsepower}</span>
+                            <span>Year: ${car.year}</span>
+                        </div>
+                        <a href="car-details.html?id=${car.id}" class="view-details">View Details</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+    <script src="main.js"></script>
+</body>
+</html>
