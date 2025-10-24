@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results - Science Adventure</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --cosmic-blue: #4A90E2;
+            --solar-yellow: #F5D76E;
+            --forest-green: #2ECC71;
+            --mars-red: #E74C3C;
+            --lavender-purple: #9B59B6;
+            --coral-pink: #FF6B6B;
+            --mint-green: #1ABC9C;
+            --sunset-orange: #F39C12;
+            --cloud-white: #FFFFFF;
+            --charcoal-gray: #2C3E50;
+            --silver-gray: #BDC3C7;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, var(--cosmic-blue) 0%, var(--lavender-purple) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .results-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score-circle {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+        
+        .score-circle svg {
+            transform: rotate(-90deg);
+        }
+        
+        .score-circle-bg {
+            fill: none;
+            stroke: var(--silver-gray);
+            stroke-width: 12;
+        }
+        
+        .score-circle-progress {
+            fill: none;
+            stroke: url(#scoreGradient);
+            stroke-width: 12;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 2s ease-in-out;
+        }
+        
+        .achievement-badge {
+            background: white;
+            border: 3px solid var(--silver-gray);
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .achievement-badge.unlocked {
+            border-color: var(--solar-yellow);
+            background: linear-gradient(135deg, var(--solar-yellow), var(--coral-pink));
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(245, 215, 110, 0.3);
+        }
+        
+        .achievement-badge.unlocked::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .mascot-container {
+            animation: mascotCelebrate 2s ease-in-out infinite;
+        }
+        
+        @keyframes mascotCelebrate {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(-5deg); }
+            75% { transform: translateY(-5px) rotate(5deg); }
+        }
+        
+        .performance-chart {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-button {
+            background: linear-gradient(45deg, var(--forest-green), var(--mint-green));
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+        }
+        
+        .action-button.secondary {
+            background: linear-gradient(45deg, var(--cosmic-blue), var(--lavender-purple));
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+        
+        .action-button.secondary:hover {
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.4);
+        }
+        
+        .particle-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .score-number {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--forest-green), var(--mint-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .category-progress {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--silver-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--forest-green), var(--mint-green));
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+        
+        @media (max-width: 768px) {
+            .results-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .score-circle {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .score-number {
+                font-size: 2rem;
+            }
+            
+            .achievement-badge {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particle-bg" class="particle-bg"></div>
+    
+    <!-- Navigation -->
+    <nav class="relative z-50 p-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <button onclick="goHome()" class="bg-white bg-opacity-20 text-white p-2 rounded-full hover:bg-opacity-30 transition-all">
+                    ← Home
+                </button>
+                <div class="text-white text-xl font-bold">Quiz Results</div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="text-white text-sm">
+                    🏆 Science Adventure Complete!
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Results Container -->
+    <div class="relative z-10 max-w-6xl mx-auto p-6">
+        <!-- Main Results -->
+        <div class="results-container p-8 mb-8">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                    🎉 Amazing Work, Scientist! 🎉
+                </h1>
+                <p class="text-xl text-gray-600">
+                    You've completed the <span id="quizCategory" class="font-bold text-purple-600"></span> quiz!
+                </p>
+            </div>
+            
+            <!-- Score Display -->
+            <div class="grid md:grid-cols-2 gap-8 items-center mb-8">
+                <!-- Score Circle -->
+                <div class="flex justify-center">
+                    <div class="score-circle">
+                        <svg width="200" height="200" viewBox="0 0 200 200">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#2ECC71"/>
+                                    <stop offset="100%" style="stop-color:#1ABC9C"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="score-circle-bg" cx="100" cy="100" r="88"/>
+                            <circle id="scoreProgress" class="score-circle-progress" cx="100" cy="100" r="88" 
+                                    stroke-dasharray="552.92" stroke-dashoffset="552.92"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="score-number" id="scoreNumber">0</div>
+                            <div class="text-gray-600 font-bold">out of <span id="totalQuestions">0</span></div>
+                            <div class="text-2xl font-bold text-purple-600" id="percentage">0%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Score Breakdown -->
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4" id="resultEmoji">🌟</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2" id="resultTitle">Great Job!</h3>
+                        <p class="text-gray-600" id="resultMessage">You've learned something new today!</p>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="correctAnswers">0</div>
+                            <div class="text-sm text-blue-800">Correct</div>
+                        </div>
+                        <div class="bg-orange-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-orange-600" id="timeSpent">0m</div>
+                            <div class="text-sm text-orange-800">Time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Analysis -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+            <!-- Performance Chart -->
+            <div class="performance-chart">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">📊 Your Performance</h3>
+                <div id="performanceChart" style="height: 300px;"></div>
+            </div>
+            
+            <!-- Category Progress -->
+            <div class="performance-chart">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">📈 Science Topics</h3>
+                <div id="categoryProgress">
+                    <!-- Category progress bars will be inserted here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Achievements -->
+        <div class="results-container p-8 mb-8">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">🏆 Achievements Unlocked!</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="achievementsGrid">
+                <!-- Achievement badges will be inserted here -->
+            </div>
+        </div>
+        
+        <!-- Mascot Celebration -->
+        <div class="mascot-container flex justify-center mb-8">
+            <div class="bg-white bg-opacity-90 rounded-2xl p-6 text-center max-w-md">
+                <div class="text-6xl mb-4" id="mascotEmoji">🎉</div>
+                <div class="text-gray-800 font-bold text-xl mb-2" id="mascotTitle">Fantastic Work!</div>
+                <div class="text-gray-600" id="mascotMessage">
+                    You're becoming a real scientist! Keep exploring and learning new things!
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="text-center space-y-4">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="retakeQuiz()" class="action-button text-white px-8 py-4 rounded-full font-bold text-lg">
+                    🔄 Try Again
+                </button>
+                <button onclick="tryNewCategory()" class="action-button secondary text-white px-8 py-4 rounded-full font-bold text-lg">
+                    🎯 New Topic
+                </button>
+                <button onclick="shareResults()" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:from-pink-600 hover:to-purple-700 transition-all transform hover:scale-105">
+                    📤 Share Results
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quiz Data -->
+    <script src="quiz-data.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="main.js"></script>
+    
+    <script>
+        // Results data
+        let quizResults = {};
+        let userProgress = {};
+        
+        // Initialize results page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadResults();
+            displayResults();
+            initParticleBackground();
+            checkAchievements();
+            displayAchievements();
+            createPerformanceChart();
+            displayCategoryProgress();
+            animateResults();
+        });
+        
+        function loadResults() {
+            // Load quiz results from localStorage
+            const resultsData = localStorage.getItem('quizResults');
+            if (resultsData) {
+                quizResults = JSON.parse(resultsData);
+            } else {
+                // Fallback data for testing
+                quizResults = {
+                    category: 'space',
+                    ageGroup: '8-11',
+                    score: 6,
+                    totalQuestions: 8,
+                    percentage: 75,
+                    answers: [],
+                    timeSpent: 120000
+                };
+            }
+            
+            // Load user progress
+            const progressData = localStorage.getItem('userProgress');
+            if (progressData) {
+                userProgress = JSON.parse(progressData);
+            } else {
+                userProgress = {
+                    totalQuizzes: 0,
+                    averageScore: 0,
+                    achievements: [],
+                    categoryProgress: {}
+                };
+            }
+            
+            // Update user progress
+            updateUserProgress();
+        }
+        
+        function updateUserProgress() {
+            userProgress.totalQuizzes++;
+            
+            // Update category progress
+            if (!userProgress.categoryProgress[quizResults.category]) {
+                userProgress.categoryProgress[quizResults.category] = {
+                    attempts: 0,
+                    bestScore: 0,
+                    averageScore: 0
+                };
+            }
+            
+            const categoryData = userProgress.categoryProgress[quizResults.category];
+            categoryData.attempts++;
+            categoryData.bestScore = Math.max(categoryData.bestScore, quizResults.score);
+            
+            // Calculate average score for the category
+            const scores = [];
+            Object.values(userProgress.categoryProgress).forEach(cat => {
+                scores.push(cat.bestScore);
+            });
+            userProgress.averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+            
+            // Save updated progress
+            localStorage.setItem('userProgress', JSON.stringify(userProgress));
+        }
+        
+        function displayResults() {
+            // Update basic info
+            document.getElementById('quizCategory').textContent = formatCategoryName(quizResults.category);
+            
+            // Update score display
+            document.getElementById('scoreNumber').textContent = quizResults.score;
+            document.getElementById('totalQuestions').textContent = quizResults.totalQuestions;
+            document.getElementById('percentage').textContent = quizResults.percentage + '%';
+            document.getElementById('correctAnswers').textContent = quizResults.score;
+            
+            // Calculate time spent
+            const minutes = Math.floor(quizResults.timeSpent / 60000);
+            document.getElementById('timeSpent').textContent = minutes + 'm';
+            
+            // Update result message based on percentage
+            updateResultMessage();
+        }
+        
+        function updateResultMessage() {
+            const percentage = quizResults.percentage;
+            const resultEmoji = document.getElementById('resultEmoji');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const mascotEmoji = document.getElementById('mascotEmoji');
+            const mascotTitle = document.getElementById('mascotTitle');
+            const mascotMessage = document.getElementById('mascotMessage');
+            
+            if (percentage >= 90) {
+                resultEmoji.textContent = '🏆';
+                resultTitle.textContent = 'Outstanding!';
+                resultMessage.textContent = 'You\'re a true Science Master! Your knowledge is incredible!';
+                mascotEmoji.textContent = '🏆';
+                mascotTitle.textContent = 'Absolutely Brilliant!';
+                mascotMessage.textContent = 'You\'ve achieved perfection! Your scientific mind is truly remarkable!';
+            } else if (percentage >= 80) {
+                resultEmoji.textContent = '🌟';
+                resultTitle.textContent = 'Excellent Work!';
+                resultMessage.textContent = 'You have a fantastic understanding of science!';
+                mascotEmoji.textContent = '🌟';
+                mascotTitle.textContent = 'Fantastic Job!';
+                mascotMessage.textContent = 'You\'re well on your way to becoming a science expert!';
+            } else if (percentage >= 70) {
+                resultEmoji.textContent = '👍';
+                resultTitle.textContent = 'Great Job!';
+                resultMessage.textContent = 'You have a solid understanding of science concepts!';
+                mascotEmoji.textContent = '👍';
+                mascotTitle.textContent = 'Well Done!';
+                mascotMessage.textContent = 'You\'re building a strong foundation in science!';
+            } else if (percentage >= 60) {
+                resultEmoji.textContent = '👏';
+                resultTitle.textContent = 'Good Effort!';
+                resultMessage.textContent = 'You\'re learning and improving with each quiz!';
+                mascotEmoji.textContent = '👏';
+                mascotTitle.textContent = 'Keep It Up!';
+                mascotMessage.textContent = 'Every quiz makes you smarter. Keep exploring!';
+            } else {
+                resultEmoji.textContent = '💪';
+                resultTitle.textContent = 'Good Try!';
+                resultMessage.textContent = 'Keep learning and you\'ll improve with practice!';
+                mascotEmoji.textContent = '💪';
+                mascotTitle.textContent = 'Don\'t Give Up!';
+                mascotMessage.textContent = 'Science is all about learning from mistakes. Keep trying!';
+            }
+        }
+        
+        function formatCategoryName(category) {
+            const names = {
+                'space': 'Space Exploration',
+                'animals': 'Amazing Animals',
+                'human-body': 'Human Body',
+                'earth-science': 'Earth Science',
+                'physics': 'Physics Fun',
+                'mixed': 'Science Mix'
+            };
+            return names[category] || category;
+        }
+        
+        function animateResults() {
+            // Animate score circle
+            const percentage = quizResults.percentage;
+            const circumference = 2 * Math.PI * 88;
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            setTimeout(() => {
+                document.getElementById('scoreProgress').style.strokeDashoffset = offset;
+            }, 500);
+            
+            // Animate score number
+            animateNumber('scoreNumber', 0, quizResults.score, 2000);
+            
+            // Animate percentage
+            setTimeout(() => {
+                animateNumber('percentage', 0, percentage, 1500, '%');
+            }, 1000);
+        }
+        
+        function animateNumber(elementId, start, end, duration, suffix = '') {
+            const element = document.getElementById(elementId);
+            const startTime = Date.now();
+            
+            function update() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(start + (end - start) * progress);
+                element.textContent = current + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            update();
+        }
+        
+        function createPerformanceChart() {
+            const chartDom = document.getElementById('performanceChart');
+            const myChart = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                series: [
+                    {
+                        name: 'Quiz Results',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: '18',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: [
+                            {
+                                value: quizResults.score,
+                                name: 'Correct',
+                                itemStyle: { color: '#2ECC71' }
+                            },
+                            {
+                                value: quizResults.totalQuestions - quizResults.score,
+                                name: 'Incorrect',
+                                itemStyle: { color: '#E74C3C' }
+                            }
+                        ]
+                    }
+                ]
+            };
+            
+            myChart.setOption(option);
+            
+            // Animate chart
+            setTimeout(() => {
+                myChart.resize();
+            }, 100);
+        }
+        
+        function displayCategoryProgress() {
+            const container = document.getElementById('categoryProgress');
+            container.innerHTML = '';
+            
+            // Display progress for all categories
+            const categories = ['space', 'animals', 'human-body', 'earth-science', 'physics'];
+            
+            categories.forEach(category => {
+                const categoryData = userProgress.categoryProgress[category] || {
+                    attempts: 0,
+                    bestScore: 0
+                };
+                
+                const progressElement = document.createElement('div');
+                progressElement.className = 'category-progress';
+                progressElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-gray-800">${formatCategoryName(category)}</span>
+                        <span class="text-sm text-gray-600">${categoryData.bestScore} points best</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${Math.min(categoryData.bestScore * 10, 100)}%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                        ${categoryData.attempts} attempt${categoryData.attempts !== 1 ? 's' : ''}
+                    </div>
+                `;
+                
+                container.appendChild(progressElement);
+                
+                // Animate progress bar
+                setTimeout(() => {
+                    const progressFill = progressElement.querySelector('.progress-fill');
+                    progressFill.style.width = Math.min(categoryData.bestScore * 10, 100) + '%';
+                }, Math.random() * 1000 + 500);
+            });
+        }
+        
+        function checkAchievements() {
+            const newAchievements = [];
+            
+            // Check for perfect score
+            if (quizResults.percentage === 100) {
+                newAchievements.push('perfect-score');
+            }
+            
+            // Check for category completion
+            if (quizResults.category === 'space') {
+                newAchievements.push('space-explorer');
+            } else if (quizResults.category === 'animals') {
+                newAchievements.push('animal-expert');
+            } else if (quizResults.category === 'human-body') {
+                newAchievements.push('body-brain');
+            } else if (quizResults.category === 'earth-science') {
+                newAchievements.push('earth-guardian');
+            } else if (quizResults.category === 'physics') {
+                newAchievements.push('physics-wizard');
+            }
+            
+            // Check for quiz master (10 quizzes)
+            if (userProgress.totalQuizzes >= 10) {
+                newAchievements.push('quiz-master');
+            }
+            
+            // Always unlock first quiz achievement
+            if (userProgress.totalQuizzes === 1) {
+                newAchievements.push('first-quiz');
+            }
+            
+            // Add new achievements to user progress
+            newAchievements.forEach(achievement => {
+                if (!userProgress.achievements.includes(achievement)) {
+                    userProgress.achievements.push(achievement);
+                }
+            });
+            
+            // Save updated achievements
+            localStorage.setItem('userProgress', JSON.stringify(userProgress));
+            
+            return newAchievements;
+        }
+        
+        function displayAchievements() {
+            const container = document.getElementById('achievementsGrid');
+            container.innerHTML = '';
+            
+            // Display all achievements
+            Object.keys(achievements).forEach(achievementKey => {
+                const achievement = achievements[achievementKey];
+                const isUnlocked = userProgress.achievements.includes(achievementKey);
+                
+                const badgeElement = document.createElement('div');
+                badgeElement.className = `achievement-badge p-6 text-center ${isUnlocked ? 'unlocked' : ''}`;
+                badgeElement.innerHTML = `
+                    <div class="text-4xl mb-3">${achievement.icon}</div>
+                    <h4 class="font-bold text-lg mb-2">${achievement.name}</h4>
+                    <p class="text-sm ${isUnlocked ? 'text-white' : 'text-gray-600'}">${achievement.description}</p>
+                    ${isUnlocked ? '<div class="text-xs mt-2 opacity-80">✅ Unlocked!</div>' : '<div class="text-xs mt-2 text-gray-500">🔒 Locked</div>'}
+                `;
+                
+                container.appendChild(badgeElement);
+                
+                // Animate unlocked badges
+                if (isUnlocked) {
+                    setTimeout(() => {
+                        anime({
+                            targets: badgeElement,
+                            scale: [0.8, 1],
+                            opacity: [0, 1],
+                            duration: 500,
+                            delay: Math.random() * 500,
+                            easing: 'easeOutBack'
+                        });
+                    }, 1000);
+                }
+            });
+        }
+        
+        function retakeQuiz() {
+            // Reset quiz data and go back to quiz page
+            localStorage.setItem('selectedCategory', quizResults.category);
+            localStorage.setItem('selectedAge', quizResults.ageGroup);
+            window.location.href = 'quiz.html';
+        }
+        
+        function tryNewCategory() {
+            // Go back to home page to select new category
+            window.location.href = 'index.html';
+        }
+        
+        function shareResults() {
+            // Create share message
+            const shareText = `I just scored ${quizResults.score}/${quizResults.totalQuestions} (${quizResults.percentage}%) on the ${formatCategoryName(quizResults.category)} quiz in Science Adventure! 🧪🚀`;
+            
+            // Try to use Web Share API if available
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Science Adventure Quiz Results',
+                    text: shareText,
+                    url: window.location.origin
+                }).catch(console.error);
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Results copied to clipboard! 📋');
+                }).catch(() => {
+                    alert('Great job! Share your results with friends! 🎉');
+                });
+            }
+        }
+        
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+        
+        function initParticleBackground() {
+            // Celebration particles
+            new p5(function(p) {
+                let particles = [];
+                let colors = ['#F5D76E', '#2ECC71', '#E74C3C', '#9B59B6', '#1ABC9C'];
+                
+                p.setup = function() {
+                    let canvas = p.createCanvas(p.windowWidth, p.windowHeight);
+                    canvas.parent('particle-bg');
+                    
+                    // Create celebration particles
+                    for (let i = 0; i < 100; i++) {
+                        particles.push({
+                            x: p.random(p.width),
+                            y: p.random(p.height),
+                            vx: p.random(-1, 1),
+                            vy: p.random(-2, 0),
+                            size: p.random(3, 8),
+                            color: p.random(colors),
+                            life: 255
+                        });
+                    }
+                };
+                
+                p.draw = function() {
+                    p.clear();
+                    
+                    particles.forEach((particle, index) => {
+                        particle.x += particle.vx;
+                        particle.y += particle.vy;
+                        particle.vy += 0.05; // gravity
+                        particle.life -= 2;
+                        
+                        p.fill(particle.color + Math.floor(particle.life).toString(16).padStart(2, '0'));
+                        p.noStroke();
+                        p.circle(particle.x, particle.y, particle.size);
+                        
+                        // Remove dead particles
+                        if (particle.life <= 0) {
+                            particles.splice(index, 1);
+                        }
+                    });
+                    
+                    // Add new particles occasionally
+                    if (particles.length < 50 && p.random() < 0.1) {
+                        particles.push({
+                            x: p.random(p.width),
+                            y: p.height + 10,
+                            vx: p.random(-1, 1),
+                            vy: p.random(-3, -1),
+                            size: p.random(3, 8),
+                            color: p.random(colors),
+                            life: 255
+                        });
+                    }
+                };
+                
+                p.windowResized = function() {
+                    p.resizeCanvas(p.windowWidth, p.windowHeight);
+                };
+            });
+        }
+    </script>
+</body>
+</html>

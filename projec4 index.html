@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Adventure Quiz - Learn Through Play!</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --cosmic-blue: #4A90E2;
+            --solar-yellow: #F5D76E;
+            --forest-green: #2ECC71;
+            --mars-red: #E74C3C;
+            --lavender-purple: #9B59B6;
+            --coral-pink: #FF6B6B;
+            --mint-green: #1ABC9C;
+            --sunset-orange: #F39C12;
+            --cloud-white: #FFFFFF;
+            --charcoal-gray: #2C3E50;
+            --silver-gray: #BDC3C7;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, var(--cosmic-blue) 0%, var(--lavender-purple) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .hero-title {
+            font-family: 'Fredoka One', cursive;
+            background: linear-gradient(45deg, var(--solar-yellow), var(--coral-pink), var(--mint-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+        
+        .category-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: var(--solar-yellow);
+        }
+        
+        .mascot-container {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .particle-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .age-selector {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .age-button {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .age-button:hover {
+            background: var(--solar-yellow);
+            border-color: var(--sunset-orange);
+            transform: scale(1.05);
+        }
+        
+        .age-button.selected {
+            background: var(--forest-green);
+            color: white;
+            border-color: var(--mint-green);
+        }
+        
+        .start-button {
+            background: linear-gradient(45deg, var(--forest-green), var(--mint-green));
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+        }
+        
+        .start-button:disabled {
+            background: var(--silver-gray);
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sound-toggle:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 1001;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--solar-yellow), var(--coral-pink));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .category-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .age-selector {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particle-bg" class="particle-bg"></div>
+    
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <!-- Sound Toggle -->
+    <div class="sound-toggle" id="soundToggle" title="Toggle Sound">
+        <span id="soundIcon">🔊</span>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="relative z-50 p-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl">
+                    🔬
+                </div>
+                <h1 class="text-white text-2xl font-bold">Science Adventure</h1>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-6 text-white">
+                <a href="#home" class="hover:text-yellow-300 transition-colors">Home</a>
+                <a href="#categories" class="hover:text-yellow-300 transition-colors">Categories</a>
+                <a href="#about" class="hover:text-yellow-300 transition-colors">About</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section id="home" class="relative z-10 pt-20 pb-32">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Left Side - Text Content -->
+                <div class="text-center lg:text-left">
+                    <h1 class="hero-title text-6xl lg:text-7xl mb-6 leading-tight">
+                        Science Adventure Quiz!
+                    </h1>
+                    
+                    <div class="text-white text-xl mb-8 leading-relaxed">
+                        <span id="typed-text"></span>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <button onclick="scrollToCategories()" class="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 transition-all transform hover:scale-105">
+                            Start Learning! 🚀
+                        </button>
+                        <button onclick="showAbout()" class="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-purple-600 transition-all">
+                            How to Play 🤔
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Right Side - Mascot -->
+                <div class="mascot-container flex justify-center">
+                    <div class="relative">
+                        <img src="resources/hero-mascot.png" alt="Labby the Science Robot" class="w-80 h-80 object-contain">
+                        <div class="absolute -top-4 -right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold animate-bounce">
+                            Hi there! 👋
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Age Selection -->
+    <section class="relative z-10 py-16">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="age-selector rounded-2xl p-8 text-center">
+                <h2 class="text-white text-3xl font-bold mb-6">Choose Your Age Group</h2>
+                <p class="text-white text-lg mb-8">This helps us give you questions that are just right for you!</p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                    <button class="age-button bg-white text-gray-800 px-6 py-3 rounded-full font-bold" data-age="5-7">
+                        🌟 Ages 5-7<br>
+                        <span class="text-sm font-normal">Simple & Fun</span>
+                    </button>
+                    <button class="age-button bg-white text-gray-800 px-6 py-3 rounded-full font-bold" data-age="8-11">
+                        🚀 Ages 8-11<br>
+                        <span class="text-sm font-normal">Explore & Learn</span>
+                    </button>
+                    <button class="age-button bg-white text-gray-800 px-6 py-3 rounded-full font-bold" data-age="12-15">
+                        🧠 Ages 12-15<br>
+                        <span class="text-sm font-normal">Discover & Understand</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Categories Section -->
+    <section id="categories" class="relative z-10 py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-white text-5xl font-bold mb-6">Choose Your Science Adventure!</h2>
+                <p class="text-white text-xl max-w-3xl mx-auto">
+                    Explore different areas of science and discover amazing facts about our world and beyond!
+                </p>
+            </div>
+            
+            <div class="category-grid grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Space Category -->
+                <div class="category-card rounded-2xl p-8 cursor-pointer" data-category="space">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🚀</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Space Exploration</h3>
+                        <p class="text-gray-600 mb-6">
+                            Journey through planets, stars, and galaxies! Learn about our amazing universe.
+                        </p>
+                        <div class="flex justify-center items-center text-sm text-gray-500 mb-4">
+                            <span class="mr-2">⭐</span>
+                            <span>5-10 Questions</span>
+                            <span class="mx-2">•</span>
+                            <span>🎯 Fun Facts</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full" style="width: 0%" data-progress="space"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Animals Category -->
+                <div class="category-card rounded-2xl p-8 cursor-pointer" data-category="animals">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🦁</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Amazing Animals</h3>
+                        <p class="text-gray-600 mb-6">
+                            Discover incredible creatures and learn how they live, grow, and survive!
+                        </p>
+                        <div class="flex justify-center items-center text-sm text-gray-500 mb-4">
+                            <span class="mr-2">⭐</span>
+                            <span>5-10 Questions</span>
+                            <span class="mx-2">•</span>
+                            <span>🎯 Fun Facts</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full" style="width: 0%" data-progress="animals"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Human Body Category -->
+                <div class="category-card rounded-2xl p-8 cursor-pointer" data-category="human-body">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🧠</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Human Body</h3>
+                        <p class="text-gray-600 mb-6">
+                            Explore how your amazing body works, from your brain to your toes!
+                        </p>
+                        <div class="flex justify-center items-center text-sm text-gray-500 mb-4">
+                            <span class="mr-2">⭐</span>
+                            <span>5-10 Questions</span>
+                            <span class="mx-2">•</span>
+                            <span>🎯 Fun Facts</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-pink-400 to-red-500 h-2 rounded-full" style="width: 0%" data-progress="human-body"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Earth Science Category -->
+                <div class="category-card rounded-2xl p-8 cursor-pointer" data-category="earth-science">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🌍</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Earth Science</h3>
+                        <p class="text-gray-600 mb-6">
+                            Learn about our planet's weather, rocks, oceans, and amazing natural forces!
+                        </p>
+                        <div class="flex justify-center items-center text-sm text-gray-500 mb-4">
+                            <span class="mr-2">⭐</span>
+                            <span>5-10 Questions</span>
+                            <span class="mx-2">•</span>
+                            <span>🎯 Fun Facts</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-green-400 to-yellow-500 h-2 rounded-full" style="width: 0%" data-progress="earth-science"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Physics Category -->
+                <div class="category-card rounded-2xl p-8 cursor-pointer" data-category="physics">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">⚡</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Physics Fun</h3>
+                        <p class="text-gray-600 mb-6">
+                            Discover how things move, why they fall, and what makes energy work!
+                        </p>
+                        <div class="flex justify-center items-center text-sm text-gray-500 mb-4">
+                            <span class="mr-2">⭐</span>
+                            <span>5-10 Questions</span>
+                            <span class="mx-2">•</span>
+                            <span>🎯 Fun Facts</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full" style="width: 0%" data-progress="physics"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mixed Category -->
+                <div class="category-card rounded-2xl p-8 cursor-pointer" data-category="mixed">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🌈</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Science Mix</h3>
+                        <p class="text-gray-600 mb-6">
+                            Try a little bit of everything! Perfect for curious minds who love all science.
+                        </p>
+                        <div class="flex justify-center items-center text-sm text-gray-500 mb-4">
+                            <span class="mr-2">⭐</span>
+                            <span>5-10 Questions</span>
+                            <span class="mx-2">•</span>
+                            <span>🎯 Fun Facts</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-purple-400 to-pink-500 h-2 rounded-full" style="width: 0%" data-progress="mixed"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Start Quiz Button -->
+            <div class="text-center mt-12">
+                <button id="startQuizBtn" class="start-button text-white px-12 py-4 rounded-full font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Start Your Science Adventure! 🎉
+                </button>
+                <p class="text-white text-sm mt-4 opacity-80">
+                    Select a category and age group above to begin
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- About Section -->
+    <section id="about" class="relative z-10 py-20 bg-white bg-opacity-10">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-white text-4xl font-bold mb-8">How to Play</h2>
+            <div class="grid md:grid-cols-3 gap-8 text-white">
+                <div class="bg-white bg-opacity-10 rounded-2xl p-6">
+                    <div class="text-4xl mb-4">🎯</div>
+                    <h3 class="text-xl font-bold mb-3">Choose Your Path</h3>
+                    <p>Select your age group and favorite science topic to get started!</p>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-2xl p-6">
+                    <div class="text-4xl mb-4">🧠</div>
+                    <h3 class="text-xl font-bold mb-3">Answer Questions</h3>
+                    <p>Read each question carefully and choose the best answer. Don't worry if you get it wrong - you'll learn something new!</p>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-2xl p-6">
+                    <div class="text-4xl mb-4">🏆</div>
+                    <h3 class="text-xl font-bold mb-3">Earn Rewards</h3>
+                    <p>Collect badges, improve your score, and become a Science Master!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="relative z-10 py-12 bg-black bg-opacity-20">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="text-white text-lg mb-4">
+                Made with ❤️ for curious young scientists everywhere!
+            </div>
+            <div class="text-white text-sm opacity-70">
+                © 2024 Geoffry's quiz app (project4)
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Quiz Data -->
+    <script src="quiz-data.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="main.js"></script>
+    
+    <script>
+        // Initialize the landing page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize particle background
+            initParticleBackground();
+            
+            // Initialize typewriter effect
+            initTypewriter();
+            
+            // Initialize sound toggle
+            initSoundToggle();
+            
+            // Initialize category selection
+            initCategorySelection();
+            
+            // Initialize age selection
+            initAgeSelection();
+            
+            // Load user progress
+            loadUserProgress();
+            
+            // Animate mascot on load
+            animateMascot();
+        });
+        
+        function initParticleBackground() {
+            // P5.js particle system
+            new p5(function(p) {
+                let particles = [];
+                
+                p.setup = function() {
+                    let canvas = p.createCanvas(p.windowWidth, p.windowHeight);
+                    canvas.parent('particle-bg');
+                    
+                    // Create particles
+                    for (let i = 0; i < 50; i++) {
+                        particles.push({
+                            x: p.random(p.width),
+                            y: p.random(p.height),
+                            vx: p.random(-0.5, 0.5),
+                            vy: p.random(-0.5, 0.5),
+                            size: p.random(2, 6),
+                            color: p.random(['#F5D76E', '#2ECC71', '#E74C3C', '#9B59B6', '#1ABC9C'])
+                        });
+                    }
+                };
+                
+                p.draw = function() {
+                    p.clear();
+                    
+                    // Update and draw particles
+                    particles.forEach(particle => {
+                        particle.x += particle.vx;
+                        particle.y += particle.vy;
+                        
+                        // Wrap around edges
+                        if (particle.x < 0) particle.x = p.width;
+                        if (particle.x > p.width) particle.x = 0;
+                        if (particle.y < 0) particle.y = p.height;
+                        if (particle.y > p.height) particle.y = 0;
+                        
+                        // Draw particle
+                        p.fill(particle.color + '40');
+                        p.noStroke();
+                        p.circle(particle.x, particle.y, particle.size);
+                    });
+                };
+                
+                p.windowResized = function() {
+                    p.resizeCanvas(p.windowWidth, p.windowHeight);
+                };
+            });
+        }
+        
+        function initTypewriter() {
+            new Typed('#typed-text', {
+                strings: [
+                    'Explore the wonders of science through fun quizzes!',
+                    'Learn about space, animals, the human body, and more!',
+                    'Perfect for curious minds aged 5-15!',
+                    'Earn badges and become a Science Master!'
+                ],
+                typeSpeed: 50,
+                backSpeed: 30,
+                backDelay: 2000,
+                loop: true,
+                showCursor: true,
+                cursorChar: '|'
+            });
+        }
+        
+        function initSoundToggle() {
+            const soundToggle = document.getElementById('soundToggle');
+            const soundIcon = document.getElementById('soundIcon');
+            let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+            
+            updateSoundIcon();
+            
+            soundToggle.addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                localStorage.setItem('soundEnabled', soundEnabled);
+                updateSoundIcon();
+                
+                // Animate toggle
+                anime({
+                    targets: soundToggle,
+                    scale: [1, 1.2, 1],
+                    duration: 300,
+                    easing: 'easeOutElastic(1, .8)'
+                });
+            });
+            
+            function updateSoundIcon() {
+                soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+            }
+        }
+        
+        function initCategorySelection() {
+            const categoryCards = document.querySelectorAll('.category-card');
+            let selectedCategory = null;
+            
+            categoryCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove previous selection
+                    categoryCards.forEach(c => c.classList.remove('ring-4', 'ring-yellow-400'));
+                    
+                    // Add selection to clicked card
+                    this.classList.add('ring-4', 'ring-yellow-400');
+                    selectedCategory = this.dataset.category;
+                    
+                    // Store selection
+                    localStorage.setItem('selectedCategory', selectedCategory);
+                    
+                    // Animate selection
+                    anime({
+                        targets: this,
+                        scale: [1, 1.05, 1],
+                        duration: 300,
+                        easing: 'easeOutElastic(1, .8)'
+                    });
+                    
+                    // Update start button
+                    updateStartButton();
+                });
+            });
+        }
+        
+        function initAgeSelection() {
+            const ageButtons = document.querySelectorAll('.age-button');
+            let selectedAge = null;
+            
+            ageButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove previous selection
+                    ageButtons.forEach(b => b.classList.remove('selected'));
+                    
+                    // Add selection to clicked button
+                    this.classList.add('selected');
+                    selectedAge = this.dataset.age;
+                    
+                    // Store selection
+                    localStorage.setItem('selectedAge', selectedAge);
+                    
+                    // Animate selection
+                    anime({
+                        targets: this,
+                        scale: [1, 1.1, 1],
+                        duration: 300,
+                        easing: 'easeOutElastic(1, .8)'
+                    });
+                    
+                    // Update start button
+                    updateStartButton();
+                });
+            });
+        }
+        
+        function updateStartButton() {
+            const startBtn = document.getElementById('startQuizBtn');
+            const selectedCategory = localStorage.getItem('selectedCategory');
+            const selectedAge = localStorage.getItem('selectedAge');
+            
+            if (selectedCategory && selectedAge) {
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        function loadUserProgress() {
+            // Load progress bars for each category
+            const progressBars = document.querySelectorAll('[data-progress]');
+            
+            progressBars.forEach(bar => {
+                const category = bar.dataset.progress;
+                const progress = getCategoryProgress(category);
+                
+                anime({
+                    targets: bar,
+                    width: progress + '%',
+                    duration: 1000,
+                    delay: Math.random() * 500,
+                    easing: 'easeOutCubic'
+                });
+            });
+        }
+        
+        function getCategoryProgress(category) {
+            // Mock progress data - in real app, this would come from localStorage
+            const progressMap = {
+                'space': 75,
+                'animals': 60,
+                'human-body': 45,
+                'earth-science': 30,
+                'physics': 20,
+                'mixed': 0
+            };
+            return progressMap[category] || 0;
+        }
+        
+        function animateMascot() {
+            // Animate mascot entrance
+            anime({
+                targets: '.mascot-container',
+                translateY: [-50, 0],
+                opacity: [0, 1],
+                duration: 1000,
+                delay: 500,
+                easing: 'easeOutBounce'
+            });
+        }
+        
+        function scrollToCategories() {
+            document.getElementById('categories').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+        
+        function showAbout() {
+            document.getElementById('about').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+        
+        // Start quiz functionality
+        document.getElementById('startQuizBtn').addEventListener('click', function() {
+            const selectedCategory = localStorage.getItem('selectedCategory');
+            const selectedAge = localStorage.getItem('selectedAge');
+            
+            if (selectedCategory && selectedAge) {
+                // Animate button click
+                anime({
+                    targets: this,
+                    scale: [1, 0.95, 1],
+                    duration: 200,
+                    complete: function() {
+                        // Navigate to quiz page
+                        window.location.href = 'quiz.html';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
