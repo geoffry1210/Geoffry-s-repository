@@ -349,10 +349,10 @@
     </div>
     
     <!-- Quiz Data -->
-    <script src="quiz-data.js"></script>
+    <script src="project4quiz-data.js"></script>
     
     <!-- Main JavaScript -->
-    <script src="main.js"></script>
+    <script src="project4main.js"></script>
     
     <script>
         // Quiz state
@@ -383,7 +383,7 @@
             
             if (!currentQuiz.category || !currentQuiz.ageGroup) {
                 // Redirect back to home if no selection
-                window.location.href = 'index.html';
+                window.location.href = 'project4index.html';
                 return;
             }
             
@@ -815,13 +815,13 @@
             
             // Navigate to results page
             setTimeout(() => {
-                window.location.href = 'results.html';
+                window.location.href = 'project4results.html';
             }, 1000);
         }
         
         function goBack() {
             if (confirm('Are you sure you want to leave the quiz? Your progress will be lost.')) {
-                window.location.href = 'index.html';
+                window.location.href = 'project4index.html';
             }
         }
         
