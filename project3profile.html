@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - CineSocial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #1a1a1a;
+            --rich-black: #0d0d0d;
+            --warm-gold: #f4d03f;
+            --soft-cyan: #00d4ff;
+            --text-white: #ffffff;
+            --text-gray: #e0e0e0;
+            --success-green: #2ecc71;
+            --warning-amber: #f39c12;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--rich-black);
+            color: var(--text-white);
+            overflow-x: hidden;
+        }
+        
+        .font-display { font-family: 'Playfair Display', serif; }
+        .font-accent { font-family: 'Space Grotesk', sans-serif; }
+        
+        .profile-gradient {
+            background: linear-gradient(135deg, var(--rich-black) 0%, var(--primary-dark) 50%, var(--rich-black) 100%);
+        }
+        
+        .profile-card {
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.8), rgba(13, 13, 13, 0.9));
+            border: 1px solid rgba(244, 208, 63, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .achievement-badge {
+            background: linear-gradient(45deg, var(--warm-gold), var(--warning-amber));
+            animation: achievementGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes achievementGlow {
+            from { box-shadow: 0 0 5px rgba(244, 208, 63, 0.3); }
+            to { box-shadow: 0 0 20px rgba(244, 208, 63, 0.6); }
+        }
+        
+        .stat-card {
+            background: linear-gradient(145deg, rgba(0, 212, 255, 0.1), rgba(244, 208, 63, 0.05));
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+        }
+        
+        .nav-blur {
+            backdrop-filter: blur(20px);
+            background: rgba(13, 13, 13, 0.9);
+        }
+        
+        .follow-button {
+            background: linear-gradient(45deg, var(--soft-cyan), var(--warm-gold));
+            transition: all 0.3s ease;
+        }
+        
+        .follow-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .follow-button.following {
+            background: var(--success-green);
+        }
+        
+        .watchlist-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .watchlist-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .review-card {
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.6), rgba(13, 13, 13, 0.8));
+            border-left: 4px solid var(--warm-gold);
+        }
+        
+        .analytics-chart {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .verified-badge {
+            background: linear-gradient(45deg, var(--success-green), var(--soft-cyan));
+            animation: verifiedPulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes verifiedPulse {
+            from { box-shadow: 0 0 5px rgba(46, 204, 113, 0.5); }
+            to { box-shadow: 0 0 15px rgba(46, 204, 113, 0.8); }
+        }
+        
+        .settings-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .settings-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #374151;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .toggle-switch.active {
+            background: var(--soft-cyan);
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="profile-gradient px-4 py-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+                <button onclick="history.back()" class="p-2 rounded-full bg-white bg-opacity-10 backdrop-blur-sm hover:bg-opacity-20 transition-all">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
+                    <span class="text-black font-bold text-lg">P</span>
+                </div>
+                <h1 class="font-display text-2xl font-bold text-white">Profile</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="showSettingsModal()" class="p-2 rounded-full bg-white bg-opacity-10 backdrop-blur-sm hover:bg-opacity-20 transition-all">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </button>
+                <button onclick="showNotifications()" class="p-2 rounded-full bg-white bg-opacity-10 backdrop-blur-sm hover:bg-opacity-20 transition-all relative">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12"/>
+                    </svg>
+                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                        <span class="text-white text-xs font-bold">3</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Profile Info -->
+    <section class="px-4 py-6">
+        <div class="profile-card rounded-2xl p-6 mb-6">
+            <div class="flex items-start justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/media.istockphoto.com/1302546568341e80659f03e703458cc59bed6d8b" alt="Profile" class="w-20 h-20 rounded-full object-cover border-4 border-yellow-400">
+                        <div class="verified-badge absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="font-display text-2xl font-bold text-white mb-1">MovieLover2024</h2>
+                        <p class="text-gray-400 text-sm mb-2">Verified Film Critic • Premium Member</p>
+                        <div class="flex items-center space-x-4 text-sm">
+                            <div class="text-center">
+                                <div class="text-white font-bold">2.1K</div>
+                                <div class="text-gray-400">Following</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-white font-bold">15.8K</div>
+                                <div class="text-gray-400">Followers</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-white font-bold">4.9</div>
+                                <div class="text-gray-400">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="editProfile()" class="follow-button text-black font-semibold px-6 py-2 rounded-full">
+                    Edit Profile
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="stat-card rounded-xl p-4 text-center">
+                    <div class="text-2xl mb-2">🎬</div>
+                    <div class="text-white font-bold text-lg">342</div>
+                    <div class="text-gray-400 text-sm">Movies Watched</div>
+                </div>
+                <div class="stat-card rounded-xl p-4 text-center">
+                    <div class="text-2xl mb-2">📝</div>
+                    <div class="text-white font-bold text-lg">127</div>
+                    <div class="text-gray-400 text-sm">Reviews Written</div>
+                </div>
+                <div class="stat-card rounded-xl p-4 text-center">
+                    <div class="text-2xl mb-2">⭐</div>
+                    <div class="text-white font-bold text-lg">4.8K</div>
+                    <div class="text-gray-400 text-sm">Likes Received</div>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-2">
+                <div class="achievement-badge text-black text-xs font-semibold px-3 py-1 rounded-full">
+                    🏆 Top Critic 2024
+                </div>
+                <div class="bg-purple-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    🎭 Genre Expert
+                </div>
+                <div class="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    📈 Trend Setter
+                </div>
+                <div class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    💎 Early Adopter
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analytics Dashboard -->
+        <div class="mb-6">
+            <h3 class="font-display text-xl font-semibold text-white mb-4">Your Analytics</h3>
+            <div class="analytics-chart">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-white font-semibold">Viewing Activity</h4>
+                    <select class="bg-gray-800 text-white text-sm rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        <option>Last 7 days</option>
+                        <option>Last 30 days</option>
+                        <option>Last 3 months</option>
+                    </select>
+                </div>
+                <div id="analytics-chart" style="height: 200px;"></div>
+            </div>
+        </div>
+        
+        <!-- Watchlist -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-display text-xl font-semibold text-white">My Watchlist</h3>
+                <button onclick="showWatchlistManager()" class="text-cyan-400 text-sm font-medium">Manage</button>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="watchlist-item rounded-xl overflow-hidden">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/static1.moviewebimages.com/527933cab29809ed4a40db591bc551fb24f96f43.jpeg" alt="Movie" class="w-full aspect-[2/3] object-cover">
+                        <div class="absolute top-2 right-2">
+                            <button onclick="removeFromWatchlist(this)" class="bg-black bg-opacity-50 rounded-full p-1">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="text-white font-semibold text-sm mb-1">Extraction 2</h4>
+                        <p class="text-gray-400 text-xs mb-2">Action Thriller</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-yellow-400 text-xs">⭐ 4.5</span>
+                            <button onclick="window.cineSocial.streamMovie('extraction_2')" class="bg-cyan-500 text-white text-xs px-2 py-1 rounded">
+                                Watch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item rounded-xl overflow-hidden">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/images.thedirect.com/1e29f38c685d107bfe0eb4cf40119237149cdc6d.jpg" alt="Movie" class="w-full aspect-[2/3] object-cover">
+                        <div class="absolute top-2 right-2">
+                            <button onclick="removeFromWatchlist(this)" class="bg-black bg-opacity-50 rounded-full p-1">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="text-white font-semibold text-sm mb-1">The Mandalorian</h4>
+                        <p class="text-gray-400 text-xs mb-2">Sci-Fi Adventure</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-yellow-400 text-xs">⭐ 4.8</span>
+                            <button onclick="window.cineSocial.streamMovie('mandalorian')" class="bg-cyan-500 text-white text-xs px-2 py-1 rounded">
+                                Watch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item rounded-xl overflow-hidden">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/otakukart.com/3e7b85eed523ae372cd78d01f6459c17473a07bc.jpg" alt="Movie" class="w-full aspect-[2/3] object-cover">
+                        <div class="absolute top-2 right-2">
+                            <button onclick="removeFromWatchlist(this)" class="bg-black bg-opacity-50 rounded-full p-1">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="text-white font-semibold text-sm mb-1">Spider-Man</h4>
+                        <p class="text-gray-400 text-xs mb-2">Superhero Action</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-yellow-400 text-xs">⭐ 4.6</span>
+                            <button onclick="window.cineSocial.streamMovie('spiderman')" class="bg-cyan-500 text-white text-xs px-2 py-1 rounded">
+                                Watch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Reviews -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-display text-xl font-semibold text-white">Recent Reviews</h3>
+                <button onclick="showAllReviews()" class="text-cyan-400 text-sm font-medium">View All</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="review-card rounded-xl p-4">
+                    <div class="flex items-start space-x-4">
+                        <img src="https://kimi-web-img.moonshot.cn/img/static1.moviewebimages.com/527933cab29809ed4a40db591bc551fb24f96f43.jpeg" alt="Movie" class="w-16 h-20 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-white font-semibold">Extraction 2</h4>
+                                <div class="flex items-center space-x-1">
+                                    <span class="text-yellow-400">⭐⭐⭐⭐⭐</span>
+                                    <span class="text-white font-semibold">5.0</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-3">
+                                An absolute masterclass in action filmmaking. Chris Hemsworth delivers his best performance yet, 
+                                and the one-take action sequences are breathtaking. This is how you do a sequel right!
+                            </p>
+                            <div class="flex items-center justify-between text-xs text-gray-400">
+                                <span>2 days ago</span>
+                                <div class="flex items-center space-x-4">
+                                    <span>👍 234</span>
+                                    <span>💬 18</span>
+                                    <span>🔄 42</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="review-card rounded-xl p-4">
+                    <div class="flex items-start space-x-4">
+                        <img src="https://kimi-web-img.moonshot.cn/img/images.squarespace-cdn.com/675f280331d4b084e65cabcd6351a43a7552e644.jpg" alt="Movie" class="w-16 h-20 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-white font-semibold">Indie Gem Discovery</h4>
+                                <div class="flex items-center space-x-1">
+                                    <span class="text-yellow-400">⭐⭐⭐⭐</span>
+                                    <span class="text-white font-semibold">4.0</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-3">
+                                A beautiful indie film that proves you don't need a massive budget to tell a compelling story. 
+                                The character development is exceptional and the cinematography is stunning.
+                            </p>
+                            <div class="flex items-center justify-between text-xs text-gray-400">
+                                <span>5 days ago</span>
+                                <div class="flex items-center space-x-4">
+                                    <span>👍 156</span>
+                                    <span>💬 12</span>
+                                    <span>🔄 28</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Following List -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-display text-xl font-semibold text-white">Following</h3>
+                <button onclick="showAllFollowing()" class="text-cyan-400 text-sm font-medium">View All</button>
+            </div>
+            
+            <div class="flex space-x-4 overflow-x-auto pb-2">
+                <div class="flex-shrink-0 text-center">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-yellow-400">
+                        <img src="https://kimi-web-img.moonshot.cn/img/framerusercontent.com/9de2765f1f1067e0d7d65954ba043e1c23e430ae.webp" alt="Following" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-white text-sm font-medium">CinemaScope</span>
+                </div>
+                
+                <div class="flex-shrink-0 text-center">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-purple-400">
+                        <img src="https://kimi-web-img.moonshot.cn/img/s.studiobinder.com/f866d663b4face09021599a10b1f3ada2fb5a8da.jpeg" alt="Following" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-white text-sm font-medium">FilmCritic</span>
+                </div>
+                
+                <div class="flex-shrink-0 text-center">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-blue-400">
+                        <img src="https://kimi-web-img.moonshot.cn/img/images.squarespace-cdn.com/675f280331d4b084e65cabcd6351a43a7552e644.jpg" alt="Following" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-white text-sm font-medium">IndieHub</span>
+                </div>
+                
+                <div class="flex-shrink-0 text-center">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-green-400">
+                        <img src="https://kimi-web-img.moonshot.cn/img/media.filmnet.io/814c03ac42155c28d5e7d757a76ac510c2530a5c.jpg" alt="Following" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-white text-sm font-medium">MovieBuff</span>
+                </div>
+                
+                <div class="flex-shrink-0 text-center">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-red-400">
+                        <img src="https://kimi-web-img.moonshot.cn/img/originalvintagemovieposters.com/d2bcc8e74887cfbcac9b00cb635a8ca7a2999b85.jpg" alt="Following" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-white text-sm font-medium">ClassicFilms</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 nav-blur border-t border-gray-800 z-50">
+        <div class="flex items-center justify-around py-2">
+            <a href="project3index.html" class="flex flex-col items-center p-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span class="text-xs">Feed</span>
+            </a>
+            <a href="project3discover.html" class="flex flex-col items-center p-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span class="text-xs">Discover</span>
+            </a>
+            <a href="project3stream.html" class="flex flex-col items-center p-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H15M9 10V9a2 2 0 012-2h2a2 2 0 012 2v1M9 10v5a2 2 0 002 2h2a2 2 0 002-2v-5"/>
+                </svg>
+                <span class="text-xs">Stream</span>
+            </a>
+            <a href="project3profile.html" class="flex flex-col items-center p-2 text-green-400">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-xs">Profile</span>
+            </a>
+        </div>
+    </nav>
+    
+    <script>
+        // Profile page functionality
+        class ProfilePage {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                this.initializeAnalytics();
+                this.setupEventListeners();
+            }
+            
+            initializeAnalytics() {
+                const chartDom = document.getElementById('analytics-chart');
+                if (chartDom) {
+                    const myChart = echarts.init(chartDom);
+                    
+                    const option = {
+                        backgroundColor: 'transparent',
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#374151'
+                                }
+                            },
+                            axisLabel: {
+                                color: '#9CA3AF'
+                            }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#374151'
+                                }
+                            },
+                            axisLabel: {
+                                color: '#9CA3AF'
+                            },
+                            splitLine: {
+                                lineStyle: {
+                                    color: '#374151'
+                                }
+                            }
+                        },
+                        series: [
+                            {
+                                name: 'Movies Watched',
+                                type: 'line',
+                                data: [3, 5, 2, 8, 4, 7, 6],
+                                smooth: true,
+                                lineStyle: {
+                                    color: '#00d4ff',
+                                    width: 3
+                                },
+                                itemStyle: {
+                                    color: '#00d4ff'
+                                },
+                                areaStyle: {
+                                    color: {
+                                        type: 'linear',
+                                        x: 0,
+                                        y: 0,
+                                        x2: 0,
+                                        y2: 1,
+                                        colorStops: [{
+                                            offset: 0, color: 'rgba(0, 212, 255, 0.3)'
+                                        }, {
+                                            offset: 1, color: 'rgba(0, 212, 255, 0.05)'
+                                        }]
+                                    }
+                                }
+                            },
+                            {
+                                name: 'Reviews Written',
+                                type: 'line',
+                                data: [1, 2, 0, 3, 2, 4, 3],
+                                smooth: true,
+                                lineStyle: {
+                                    color: '#f4d03f',
+                                    width: 3
+                                },
+                                itemStyle: {
+                                    color: '#f4d03f'
+                                },
+                                areaStyle: {
+                                    color: {
+                                        type: 'linear',
+                                        x: 0,
+                                        y: 0,
+                                        x2: 0,
+                                        y2: 1,
+                                        colorStops: [{
+                                            offset: 0, color: 'rgba(244, 208, 63, 0.3)'
+                                        }, {
+                                            offset: 1, color: 'rgba(244, 208, 63, 0.05)'
+                                        }]
+                                    }
+                                }
+                            }
+                        ],
+                        tooltip: {
+                            trigger: 'axis',
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            borderColor: '#374151',
+                            textStyle: {
+                                color: '#ffffff'
+                            }
+                        }
+                    };
+                    
+                    myChart.setOption(option);
+                    
+                    // Make chart responsive
+                    window.addEventListener('resize', () => {
+                        myChart.resize();
+                    });
+                }
+            }
+            
+            setupEventListeners() {
+                // Add any additional event listeners here
+            }
+        }
+        
+        // Global functions
+        function editProfile() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-md">
+                    <h3 class="text-white font-semibold mb-4 text-center">Edit Profile</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-300 text-sm block mb-2">Display Name</label>
+                            <input type="text" value="MovieLover2024" class="w-full bg-gray-800 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+                        </div>
+                        <div>
+                            <label class="text-gray-300 text-sm block mb-2">Bio</label>
+                            <textarea placeholder="Tell us about your movie preferences..." class="w-full bg-gray-800 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 h-20">Verified Film Critic • Premium Member</textarea>
+                        </div>
+                        <div>
+                            <label class="text-gray-300 text-sm block mb-2">Favorite Genres</label>
+                            <input type="text" placeholder="Action, Thriller, Sci-Fi..." class="w-full bg-gray-800 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-700 text-white py-2 rounded-lg font-medium">
+                            Cancel
+                        </button>
+                        <button onclick="saveProfile(); this.closest('.fixed').remove()" class="flex-1 bg-green-500 text-white py-2 rounded-lg font-medium">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function saveProfile() {
+            if (window.cineSocial) {
+                window.cineSocial.showNotification('Profile updated successfully!', 'success');
+            }
+        }
+        
+        function removeFromWatchlist(button) {
+            const item = button.closest('.watchlist-item');
+            if (item) {
+                item.style.opacity = '0.5';
+                setTimeout(() => {
+                    item.remove();
+                    if (window.cineSocial) {
+                        window.cineSocial.showNotification('Removed from watchlist', 'warning');
+                    }
+                }, 300);
+            }
+        }
+        
+        function showSettingsModal() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-md max-h-96 overflow-y-auto">
+                    <h3 class="text-white font-semibold mb-4 text-center">Settings</h3>
+                    <div class="space-y-3">
+                        <div class="settings-item rounded-lg p-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-white font-medium">Push Notifications</div>
+                                    <div class="text-gray-400 text-sm">Get notified about new releases</div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                            </div>
+                        </div>
+                        <div class="settings-item rounded-lg p-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-white font-medium">Email Updates</div>
+                                    <div class="text-gray-400 text-sm">Weekly digest and recommendations</div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                            </div>
+                        </div>
+                        <div class="settings-item rounded-lg p-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-white font-medium">Auto-Download</div>
+                                    <div class="text-gray-400 text-sm">Download movies for offline viewing</div>
+                                </div>
+                                <div class="toggle-switch" onclick="toggleSetting(this)"></div>
+                            </div>
+                        </div>
+                        <div class="settings-item rounded-lg p-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-white font-medium">Data Saver</div>
+                                    <div class="text-gray-400 text-sm">Reduce streaming quality on mobile data</div>
+                                </div>
+                                <div class="toggle-switch" onclick="toggleSetting(this)"></div>
+                            </div>
+                        </div>
+                        <div class="settings-item rounded-lg p-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-white font-medium">Private Profile</div>
+                                    <div class="text-gray-400 text-sm">Only followers can see your activity</div>
+                                </div>
+                                <div class="toggle-switch" onclick="toggleSetting(this)"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-700 text-white py-2 rounded-lg font-medium">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function toggleSetting(toggle) {
+            toggle.classList.toggle('active');
+        }
+        
+        function showNotifications() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-md max-h-96 overflow-y-auto">
+                    <h3 class="text-white font-semibold mb-4 text-center">Notifications</h3>
+                    <div class="space-y-3">
+                        <div class="bg-gray-800 rounded-lg p-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-white font-medium text-sm">New review from CinemaScope</div>
+                                    <div class="text-gray-400 text-xs">2 hours ago</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 rounded-lg p-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-white font-medium text-sm">Your review got 100 likes!</div>
+                                    <div class="text-gray-400 text-xs">1 day ago</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 rounded-lg p-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-white font-medium text-sm">New movie added to your watchlist</div>
+                                    <div class="text-gray-400 text-xs">3 days ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-700 text-white py-2 rounded-lg font-medium">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function showWatchlistManager() {
+            if (window.cineSocial) {
+                window.cineSocial.showNotification('Watchlist manager opened', 'info');
+            }
+        }
+        
+        function showAllReviews() {
+            if (window.cineSocial) {
+                window.cineSocial.showNotification('Loading all reviews...', 'info');
+            }
+        }
+        
+        function showAllFollowing() {
+            if (window.cineSocial) {
+                window.cineSocial.showNotification('Loading all following...', 'info');
+            }
+        }
+        
+        // Initialize profile page
+        document.addEventListener('DOMContentLoaded', () => {
+            window.profilePage = new ProfilePage();
+        });
+    </script>
+    
+    <script src="project3main.js"></script>
+</body>
+</html>

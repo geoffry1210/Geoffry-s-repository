@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover - CineSocial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #1a1a1a;
+            --rich-black: #0d0d0d;
+            --warm-gold: #f4d03f;
+            --soft-cyan: #00d4ff;
+            --text-white: #ffffff;
+            --text-gray: #e0e0e0;
+            --success-green: #2ecc71;
+            --warning-amber: #f39c12;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--rich-black);
+            color: var(--text-white);
+            overflow-x: hidden;
+        }
+        
+        .font-display { font-family: 'Playfair Display', serif; }
+        .font-accent { font-family: 'Space Grotesk', sans-serif; }
+        
+        .search-gradient {
+            background: linear-gradient(135deg, var(--rich-black) 0%, var(--primary-dark) 50%, var(--rich-black) 100%);
+        }
+        
+        .ai-card {
+            background: linear-gradient(145deg, rgba(0, 212, 255, 0.1), rgba(244, 208, 63, 0.05));
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .mood-button {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .mood-button.active {
+            border-color: var(--warm-gold);
+            background: rgba(244, 208, 63, 0.1);
+        }
+        
+        .genre-tag {
+            background: linear-gradient(45deg, var(--soft-cyan), var(--warm-gold));
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .recommendation-card {
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.8), rgba(13, 13, 13, 0.9));
+            border: 1px solid rgba(244, 208, 63, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(244, 208, 63, 0.1);
+        }
+        
+        .nav-blur {
+            backdrop-filter: blur(20px);
+            background: rgba(13, 13, 13, 0.9);
+        }
+        
+        .voice-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+        
+        .filter-chip {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .filter-chip.active {
+            background: var(--warm-gold);
+            color: var(--rich-black);
+            border-color: var(--warm-gold);
+        }
+        
+        .trending-indicator {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(255, 107, 107, 0.5); }
+            to { box-shadow: 0 0 20px rgba(255, 107, 107, 0.8); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="search-gradient px-4 py-6 pb-8">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="text-black font-bold text-lg">D</span>
+                </div>
+                <h1 class="font-display text-2xl font-bold text-white">Discover</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="voice-search-btn" class="p-2 rounded-full bg-white bg-opacity-10 backdrop-blur-sm hover:bg-opacity-20 transition-all">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                    </svg>
+                </button>
+                <button class="p-2 rounded-full bg-white bg-opacity-10 backdrop-blur-sm hover:bg-opacity-20 transition-all">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="relative mb-6">
+            <input 
+                type="text" 
+                id="search-input"
+                placeholder="Search movies, actors, directors..." 
+                class="w-full bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl px-6 py-4 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:bg-opacity-20 transition-all"
+            >
+            <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Quick Filters -->
+        <div class="flex space-x-3 overflow-x-auto pb-2">
+            <button class="filter-chip px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap active" data-filter="all">
+                All Movies
+            </button>
+            <button class="filter-chip px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-filter="trending">
+                🔥 Trending
+            </button>
+            <button class="filter-chip px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-filter="new">
+                ✨ New Releases
+            </button>
+            <button class="filter-chip px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-filter="top-rated">
+                ⭐ Top Rated
+            </button>
+            <button class="filter-chip px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-filter="indie">
+                🎭 Indie Films
+            </button>
+        </div>
+    </header>
+    
+    <!-- AI Recommendations Section -->
+    <section class="px-4 py-6">
+        <div class="ai-card rounded-2xl p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-semibold text-white">AI Movie Curator</h3>
+                    <p class="text-gray-300 text-sm">Personalized recommendations just for you</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div class="bg-black bg-opacity-30 rounded-xl p-4">
+                    <div class="text-cyan-400 text-2xl mb-2">🧠</div>
+                    <h4 class="text-white font-semibold mb-1">Mind-Bending Thrillers</h4>
+                    <p class="text-gray-400 text-sm mb-2">95% match confidence</p>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full" style="width: 95%"></div>
+                    </div>
+                </div>
+                <div class="bg-black bg-opacity-30 rounded-xl p-4">
+                    <div class="text-yellow-400 text-2xl mb-2">🕵️</div>
+                    <h4 class="text-white font-semibold mb-1">Neo-Noir Mysteries</h4>
+                    <p class="text-gray-400 text-sm mb-2">88% match confidence</p>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full" style="width: 88%"></div>
+                    </div>
+                </div>
+                <div class="bg-black bg-opacity-30 rounded-xl p-4">
+                    <div class="text-green-400 text-2xl mb-2">💎</div>
+                    <h4 class="text-white font-semibold mb-1">Hidden Indie Gems</h4>
+                    <p class="text-gray-400 text-sm mb-2">82% match confidence</p>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full" style="width: 82%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="generateAIRecommendations()" class="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                Generate New Recommendations
+            </button>
+        </div>
+    </section>
+    
+    <!-- Mood Selector -->
+    <section class="px-4 py-4">
+        <h3 class="font-display text-xl font-semibold mb-4 text-white">What's Your Mood?</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <button class="mood-button bg-gray-800 rounded-xl p-4 text-center" data-mood="romantic">
+                <div class="text-2xl mb-2">💕</div>
+                <span class="text-white font-medium">Romantic</span>
+            </button>
+            <button class="mood-button bg-gray-800 rounded-xl p-4 text-center" data-mood="thriller">
+                <div class="text-2xl mb-2">🔥</div>
+                <span class="text-white font-medium">Thriller</span>
+            </button>
+            <button class="mood-button bg-gray-800 rounded-xl p-4 text-center" data-mood="comedy">
+                <div class="text-2xl mb-2">😂</div>
+                <span class="text-white font-medium">Comedy</span>
+            </button>
+            <button class="mood-button bg-gray-800 rounded-xl p-4 text-center" data-mood="drama">
+                <div class="text-2xl mb-2">🎭</div>
+                <span class="text-white font-medium">Drama</span>
+            </button>
+        </div>
+    </section>
+    
+    <!-- Search Results -->
+    <section id="search-results" class="px-4 py-4">
+        <!-- Default Content -->
+        <div id="default-content">
+            <!-- Trending Movies -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-display text-xl font-semibold text-white">🔥 Trending Now</h3>
+                    <button class="text-cyan-400 text-sm font-medium">View All</button>
+                </div>
+                
+                <div class="splide" id="trending-carousel">
+                    <div class="splide__track">
+                        <ul class="splide__list">
+                            <li class="splide__slide">
+                                <div class="recommendation-card rounded-2xl overflow-hidden">
+                                    <div class="relative">
+                                        <img src="https://kimi-web-img.moonshot.cn/img/static1.moviewebimages.com/527933cab29809ed4a40db591bc551fb24f96f43.jpeg" alt="Extraction 2" class="w-full aspect-[2/3] object-cover">
+                                        <div class="absolute top-3 left-3">
+                                            <div class="trending-indicator text-black text-xs font-bold px-2 py-1 rounded-full">
+                                                🔥 #1
+                                            </div>
+                                        </div>
+                                        <div class="absolute top-3 right-3">
+                                            <div class="bg-black bg-opacity-50 rounded-full p-2">
+                                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h4 class="font-semibold text-white mb-1">Extraction 2</h4>
+                                        <p class="text-gray-400 text-sm mb-2">Action Thriller • 2024</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-yellow-400 text-sm font-semibold">⭐ 4.5</span>
+                                            <button onclick="window.cineSocial.streamMovie('extraction_2')" class="bg-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                                Watch Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="splide__slide">
+                                <div class="recommendation-card rounded-2xl overflow-hidden">
+                                    <div class="relative">
+                                        <img src="https://kimi-web-img.moonshot.cn/img/images.thedirect.com/1e29f38c685d107bfe0eb4cf40119237149cdc6d.jpg" alt="The Mandalorian" class="w-full aspect-[2/3] object-cover">
+                                        <div class="absolute top-3 left-3">
+                                            <div class="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                ⭐ TOP
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h4 class="font-semibold text-white mb-1">The Mandalorian</h4>
+                                        <p class="text-gray-400 text-sm mb-2">Sci-Fi Adventure • 2024</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-yellow-400 text-sm font-semibold">⭐ 4.8</span>
+                                            <button onclick="window.cineSocial.streamMovie('mandalorian')" class="bg-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                                Watch Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="splide__slide">
+                                <div class="recommendation-card rounded-2xl overflow-hidden">
+                                    <div class="relative">
+                                        <img src="https://kimi-web-img.moonshot.cn/img/otakukart.com/3e7b85eed523ae372cd78d01f6459c17473a07bc.jpg" alt="Spider-Man" class="w-full aspect-[2/3] object-cover">
+                                        <div class="absolute top-3 left-3">
+                                            <div class="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                ✨ NEW
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h4 class="font-semibold text-white mb-1">Spider-Man</h4>
+                                        <p class="text-gray-400 text-sm mb-2">Superhero Action • 2024</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-yellow-400 text-sm font-semibold">⭐ 4.6</span>
+                                            <button onclick="window.cineSocial.streamMovie('spiderman')" class="bg-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                                Watch Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- New Releases -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-display text-xl font-semibold text-white">✨ New Releases</h3>
+                    <button class="text-cyan-400 text-sm font-medium">View All</button>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="recommendation-card rounded-2xl overflow-hidden">
+                        <div class="relative">
+                            <img src="https://kimi-web-img.moonshot.cn/img/originalvintagemovieposters.com/d2bcc8e74887cfbcac9b00cb635a8ca7a2999b85.jpg" alt="Classic Film" class="w-full aspect-[2/3] object-cover">
+                            <div class="absolute top-3 left-3">
+                                <div class="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    CLASSIC
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-white mb-1">Casablanca</h4>
+                            <p class="text-gray-400 text-sm mb-2">Classic Drama • 1942</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-yellow-400 text-sm font-semibold">⭐ 4.9</span>
+                                <button onclick="window.cineSocial.streamMovie('casablanca')" class="bg-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                    Watch Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-card rounded-2xl overflow-hidden">
+                        <div class="relative">
+                            <img src="https://kimi-web-img.moonshot.cn/img/media.filmnet.io/814c03ac42155c28d5e7d757a76ac510c2530a5c.jpg" alt="Indie Film" class="w-full aspect-[2/3] object-cover">
+                            <div class="absolute top-3 left-3">
+                                <div class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    INDIE
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-white mb-1">Moonlight</h4>
+                            <p class="text-gray-400 text-sm mb-2">Indie Drama • 2016</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-yellow-400 text-sm font-semibold">⭐ 4.7</span>
+                                <button onclick="window.cineSocial.streamMovie('moonlight')" class="bg-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                    Watch Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-card rounded-2xl overflow-hidden">
+                        <div class="relative">
+                            <img src="https://kimi-web-img.moonshot.cn/img/i.ebayimg.com/0c15597edee654de81cb74b0a8b9e19a6d444d2c.jpg" alt="Horror Film" class="w-full aspect-[2/3] object-cover">
+                            <div class="absolute top-3 left-3">
+                                <div class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    HORROR
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-white mb-1">Hereditary</h4>
+                            <p class="text-gray-400 text-sm mb-2">Horror Thriller • 2018</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-yellow-400 text-sm font-semibold">⭐ 4.4</span>
+                                <button onclick="window.cineSocial.streamMovie('hereditary')" class="bg-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                    Watch Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Rated -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-display text-xl font-semibold text-white">🏆 Top Rated This Week</h3>
+                    <button class="text-cyan-400 text-sm font-medium">View All</button>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center bg-gray-800 bg-opacity-50 rounded-xl p-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-black font-bold">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-white font-semibold">The Shawshank Redemption</h4>
+                            <p class="text-gray-400 text-sm">Drama • 1994</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-yellow-400 font-semibold">⭐ 4.9</div>
+                            <div class="text-gray-400 text-xs">2.1M ratings</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center bg-gray-800 bg-opacity-50 rounded-xl p-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-black font-bold">2</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-white font-semibold">The Godfather</h4>
+                            <p class="text-gray-400 text-sm">Crime Drama • 1972</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-yellow-400 font-semibold">⭐ 4.9</div>
+                            <div class="text-gray-400 text-xs">1.8M ratings</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center bg-gray-800 bg-opacity-50 rounded-xl p-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-black font-bold">3</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-white font-semibold">Pulp Fiction</h4>
+                            <p class="text-gray-400 text-sm">Crime Thriller • 1994</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-yellow-400 font-semibold">⭐ 4.8</div>
+                            <div class="text-gray-400 text-xs">1.5M ratings</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 nav-blur border-t border-gray-800 z-50">
+        <div class="flex items-center justify-around py-2">
+            <a href="project3index.html" class="flex flex-col items-center p-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span class="text-xs">Feed</span>
+            </a>
+            <a href="project3discover.html" class="flex flex-col items-center p-2 text-cyan-400">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span class="text-xs">Discover</span>
+            </a>
+            <a href="project3stream.html" class="flex flex-col items-center p-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H15M9 10V9a2 2 0 012-2h2a2 2 0 012 2v1M9 10v5a2 2 0 002 2h2a2 2 0 002-2v-5"/>
+                </svg>
+                <span class="text-xs">Stream</span>
+            </a>
+            <a href="project3profile.html" class="flex flex-col items-center p-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-xs">Profile</span>
+            </a>
+        </div>
+    </nav>
+    
+    <script>
+        // Discover page specific functionality
+        class DiscoverPage {
+            constructor() {
+                this.currentFilter = 'all';
+                this.currentMood = null;
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.initializeCarousel();
+                this.setupVoiceSearch();
+            }
+            
+            setupEventListeners() {
+                // Filter chips
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentFilter = e.target.dataset.filter;
+                        this.applyFilter();
+                    });
+                });
+                
+                // Mood buttons
+                document.querySelectorAll('.mood-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        document.querySelectorAll('.mood-button').forEach(b => b.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        this.currentMood = e.currentTarget.dataset.mood;
+                        this.applyMoodFilter();
+                    });
+                });
+                
+                // Search input
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        this.performSearch(e.target.value);
+                    });
+                }
+            }
+            
+            initializeCarousel() {
+                if (document.getElementById('trending-carousel')) {
+                    new Splide('#trending-carousel', {
+                        type: 'loop',
+                        perPage: 2,
+                        perMove: 1,
+                        gap: '1rem',
+                        autoplay: true,
+                        interval: 3000,
+                        pauseOnHover: true,
+                        arrows: false,
+                        pagination: false,
+                        breakpoints: {
+                            768: {
+                                perPage: 1,
+                            }
+                        }
+                    }).mount();
+                }
+            }
+            
+            setupVoiceSearch() {
+                const voiceButton = document.getElementById('voice-search-btn');
+                if (voiceButton && 'webkitSpeechRecognition' in window) {
+                    const recognition = new webkitSpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = 'en-US';
+                    
+                    recognition.onstart = () => {
+                        voiceButton.classList.add('voice-pulse');
+                        voiceButton.style.color = '#00d4ff';
+                    };
+                    
+                    recognition.onresult = (event) => {
+                        const query = event.results[0][0].transcript;
+                        document.getElementById('search-input').value = query;
+                        this.performSearch(query);
+                    };
+                    
+                    recognition.onend = () => {
+                        voiceButton.classList.remove('voice-pulse');
+                        voiceButton.style.color = 'white';
+                    };
+                    
+                    voiceButton.addEventListener('click', () => {
+                        recognition.start();
+                    });
+                }
+            }
+            
+            performSearch(query) {
+                if (!query.trim()) {
+                    this.showDefaultContent();
+                    return;
+                }
+                
+                // Simulate search results
+                const mockResults = [
+                    { title: 'Inception', genre: 'Sci-Fi', rating: 4.8, year: 2010 },
+                    { title: 'The Matrix', genre: 'Sci-Fi', rating: 4.7, year: 1999 },
+                    { title: 'Interstellar', genre: 'Sci-Fi', rating: 4.6, year: 2014 }
+                ];
+                
+                this.displaySearchResults(mockResults, query);
+            }
+            
+            displaySearchResults(results, query) {
+                const container = document.getElementById('search-results');
+                const defaultContent = document.getElementById('default-content');
+                
+                if (defaultContent) {
+                    defaultContent.style.display = 'none';
+                }
+                
+                container.innerHTML = `
+                    <div class="mb-6">
+                        <h3 class="text-white font-semibold mb-4">Search Results for "${query}"</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                           ${results.map(movie => `
+                                <div class="recommendation-card rounded-2xl overflow-hidden">
+                                    <div class="p-4">
+                                        <h4 class="font-semibold text-white mb-1">${movie.title}</h4>
+                                        <p class="text-gray-400 text-sm mb-2">${movie.genre} • ${movie.year}</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-yellow-400 text-sm font-semibold">⭐ ${movie.rating}</span>
+                                            <button onclick="window.cineSocial.streamMovie('${movie.title.toLowerCase().replace(' ', '_')}')" class="bg-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                                Watch
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button onclick="window.discoverPage.clearSearch()" class="mt-4 text-cyan-400 hover:text-cyan-300 text-sm">
+                            Clear Search
+                        </button>
+                    </div>
+                `;
+            }
+            
+            clearSearch() {
+                document.getElementById('search-input').value = '';
+                this.showDefaultContent();
+            }
+            
+            showDefaultContent() {
+                const container = document.getElementById('search-results');
+                const defaultContent = document.getElementById('default-content');
+                
+                if (defaultContent) {
+                    defaultContent.style.display = 'block';
+                }
+            }
+            
+            applyFilter() {
+                console.log(`Applying filter: ${this.currentFilter}`);
+                // Filter logic would go here
+            }
+            
+            applyMoodFilter() {
+                console.log(`Applying mood filter: ${this.currentMood}`);
+                // Mood-based filtering logic would go here
+            }
+        }
+        
+        // Global function for AI recommendations
+        function generateAIRecommendations() {
+            // Simulate AI recommendation generation
+            const recommendations = [
+                'Based on your viewing history, you might enjoy psychological thrillers',
+                'Users with similar tastes also liked neo-noir films',
+                'New indie releases match your preference for character-driven stories'
+            ];
+            
+            const randomRec = recommendations[Math.floor(Math.random() * recommendations.length)];
+            
+            // Show notification
+            if (window.cineSocial) {
+                window.cineSocial.showNotification(randomRec, 'info');
+            }
+        }
+        
+        // Initialize discover page
+        document.addEventListener('DOMContentLoaded', () => {
+            window.discoverPage = new DiscoverPage();
+        });
+    </script>
+    
+    <script src="project3main.js"></script>
+</body>
+</html>
